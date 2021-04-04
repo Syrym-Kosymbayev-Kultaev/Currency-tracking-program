@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+import smtplib
 
 class Currency:
     DOLLAR_TG = 'https://mig.kz/'
@@ -23,11 +24,32 @@ class Currency:
         currency = float(self.get_currency_price().replace(",", "."))
         if currency >= self.current_converted_price + self.difference:
             print('Курс сильно вырос')
+            self.send_mail()
         elif currency <= self.current_converted_price - self.difference:
             print('Курс сильно упал')
+            self.send_mail()
         print('Сейчас курс 1 доллара = ' + str(currency))
         time.sleep(5)
         self.check_currency()
+
+    def send_mail(self):
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+
+        server.login('MAIL', 'PASSWORD')
+
+        subject = 'Currency mail'
+        body = 'Currency has been changed!'
+        message = 'Subject: {}\n{}'.format(subject, body)
+
+        server.sendmail(
+            'От кого',
+            'Кому',
+            message
+        )
+        server.quit()
 
 currency = Currency()
 currency.check_currency()
